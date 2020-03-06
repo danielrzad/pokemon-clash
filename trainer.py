@@ -2,16 +2,18 @@ import pokemon
 import pokemon_game
 
 from pprint import pprint
-
+from random import random
 
 class Trainer:
-    """Trainer base class"""
+    """Trainer initialization"""
     def __init__(self):
         self.name = input("Please enter Your Trainer name: ")
         self.points = pokemon_game.game_config.starting_points
         self.owned_pokemons = self.choose_pokemons()
         self.currently_active_pokemon = self.set_active_pokemon()
         self.available_potions = self.choose_potions()
+        self.available_pokeballs = self.choose_pokeballs()
+
     ### Methods for object creation~ ###
 
     def choose_pokemons(self):
@@ -91,17 +93,35 @@ class Trainer:
                 "potions. You won't be able to heal Yours Pokemons during the "
                 "fight."
             )
+
+    def choose_pokeballs(self):
+        pokeball_cost = pokemon_game.game_config.pokeball_cost
+        if self.points >= pokeball_cost:
+            print(
+                f"Now it's time to choose how many Pokeballs do You want to "
+                f"take into the fight. You have {self.points} points left. " 
+                f"Each Pokeball costs {pokeball_cost} points. If you don't "
+                f"want any Pokeballs enter 0."
+            )
+            pokeball_number = int_input_check()
+            if pokeball_number * pokeball_cost <= self.points:
+                self.available_pokeballs = pokeball_number
+                print(
+                    f"Now You have {pokeball_number} potions in Yours invetory."
+                )
+                return pokeball_number
+            print("You don't have enough points to take that many Pokeballs.")
+            return self.choose_potions()
+        else:
+            print(
+                "Unfortunately you didn't leave any points for Pokeballs."
+                "You won't be able to catch you opponent Pokemons during the "
+                "fight."
+            )
+
     ### End of methods for object creation ###
     
     ### Start of action methods ###
-    def ko_check(self):
-        if self.currently_active_pokemon.ko_status:
-            print(
-                f"Sorry {self.currently_active_pokemon.name} has been knocked "
-                f"out and He's unable to fight. You need to switch it to "
-                f"another one."
-            )
-
     def attack(self, target):
         self.ko_check()
         else:
@@ -110,14 +130,23 @@ class Trainer:
             )
 
     def catch(self, target):
-        if self.currently_active_pokemon.ko_status:
+        self.ko_check()
+        else:
+            target_pokemon = target.currently_active_pokemon
+            target_current_hp = target_pokemon.current_health
+            target_max_hp = target_pokemon.max_health
             print(
-                f"Sorry {self.currently_active_pokemon.name} has been knocked "
-                f"out and He's unable to fight. You need to switch it to "
-                f"another one."
+                f"{self.name} trying to catch {target.name}'s "
+                f"{target_pokemon.name} using one Pokeball!"
             )
-        if
-
+            catch_chance = round(target_current_hp / target_max_hp, 2)
+            defense_chance = round(1 - catch_chance, 2)
+            if np.random.choice(
+                ['True', 'False'], 1, False, p=[catch_chance, defense_chance]
+            ) == ['True']:
+                self.owned_pokemons.append(target_pokemon)
+                target.owned_pokemons.remove(target_pokemon)
+                self.
 
     def heal_pokemon(self):
         if self.available_potions >= 1:
@@ -135,7 +164,37 @@ class Trainer:
         else:
             print("Sorry You don't have enough potions to use")
 
+    def ko_check(self):
+        if self.currently_active_pokemon.ko_status:
+            print(
+                f"Sorry {self.currently_active_pokemon.name} has been knocked "
+                f"out and He's unable to fight. You need to switch it to "
+                f"another one or heal it using health potion."
+            )
+            if self.available_potions > 0:
+                print("Do You want to heal You Pokemon?")
+                asnwer = input("Please enter 'Yes' or 'No'.:")
+                while asnwer != "Yes" or asnwer != "No":
+                    asnwer
+                if asnwer == "Yes":
+                    return self.heal_pokemon()
+            return self.switch_pokemon()
+
     def switch_pokemon(self, choice):
+        print(
+            "Your Pokemon had been knocked out. You need to switch him to "
+            "another one. You can choose from "
+            )
+        choices = []
+        for pokemon in self.owned_pokemons:
+            if pokemon.ko_status == False:
+                choices.append(pokemon.name)
+        print(choices)
+        choice = input(
+            "Please choose one Pokemon from ones listed above. Enter Pokemon "
+            "name.:")
+        while choice not in choices:
+            choice
         if choice in self.owned_pokemons:
             if choice.ko_status:                    
                 self.currently_active_pokemon = choice
